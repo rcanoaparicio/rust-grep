@@ -1,0 +1,3 @@
+[package]
+name = "rust-grep"
+version = "0.1.0"
