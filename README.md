@@ -1,5 +1,5 @@
 # RUST-GREP
-Check if a string matches a regex pattern.
+Check if input matches a regex pattern.
 
 ## Installation
 Install rust in your machine following the (documentation)[https://www.rust-lang.org/tools/install]. 
@@ -12,6 +12,6 @@ cargo build
 
 Execute the program
 ```
-./target/debug/rust-grep regex-expression input-string
+./target/debug/rust-grep regex-expression
 ```
 

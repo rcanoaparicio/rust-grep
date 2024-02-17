@@ -1,4 +1,5 @@
 use std::env;
+use std::io;
 use std::process::exit;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -162,22 +163,21 @@ fn match_pattern(input_line: &str, pattern: &Vec<Expression>) -> bool {
 
 
 fn main() {
-    if env::args().count() != 3 {
-        println!("Wrong input.\nUsage: rust-grep pattern line");
+    if env::args().count() != 2 {
+        println!("Wrong input.\nUsage: rust-grep pattern");
         exit(1);
     }
 
     let pattern = env::args().nth(1).unwrap();
     let expressions = pattern_to_expressions(&pattern);
-    let input = env::args().nth(2).unwrap();
-
-
-    if match_pattern(&input, &expressions) {
-        println!("match");
-        exit(0);
-    } else {
-        println!("no match");
-        exit(1);
+    let mut input: String = String::new();
+    while io::stdin().read_line(&mut input).expect("Error while tyring to read input") > 0 {
+        if match_pattern(&input, &expressions) {
+            println!("match");
+        } else {
+            println!("no match");
+        }
+        input = String::new();
     }
 }
 
@@ -302,14 +302,14 @@ mod tests {
 
     #[test]
     fn match_zero_or_more() {
-        let expressions = pattern_to_expressions(&"a?b");
+        let expressions = pattern_to_expressions(&"a*b");
         assert_eq!(match_pattern(&"ab", &expressions), true);
         assert_eq!(match_pattern(&"aab", &expressions), true);
         assert_eq!(match_pattern(&"acb", &expressions), true);
         assert_eq!(match_pattern(&"cb", &expressions), true);
         assert_eq!(match_pattern(&"b", &expressions), true);
     
-        let other_expressions = pattern_to_expressions(&"a[bc]?d");
+        let other_expressions = pattern_to_expressions(&"a[bc]*d");
         assert_eq!(match_pattern(&"ad", &other_expressions), true);
         assert_eq!(match_pattern(&"cd", &other_expressions), false);
         assert_eq!(match_pattern(&"acd", &other_expressions), true);
@@ -326,7 +326,7 @@ mod tests {
 
     #[test]
     fn match_alternations_with_repetition() {
-        let expressions = pattern_to_expressions(&"^(a|b)?$");
+        let expressions = pattern_to_expressions(&"^(a|b)*$");
         assert_eq!(match_pattern(&"a", &expressions), true);
         assert_eq!(match_pattern(&"b", &expressions), true);
         assert_eq!(match_pattern(&"ab", &expressions), true);
