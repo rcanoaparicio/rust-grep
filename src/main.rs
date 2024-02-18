@@ -172,19 +172,29 @@ fn match_pattern_from(input_chars: &mut std::str::Chars<'_>, pattern: &Vec<Expre
 }
 
 fn match_pattern(input_line: &str, pattern: &Vec<Expression>) -> Option<Vec<u8>> {
+    let mut results: Vec<u8> = Vec::new();
     for i in 0..input_line.chars().count()  {
+        if results.len() > 0 && results[results.len() - 1] >= i as u8 {
+            continue;
+        } 
         let mut input_chars = input_line[i..].chars();
         match pattern[0] {
             Expression::Start => return match_pattern_from(&mut input_chars, pattern, i),
             _ => {
                 match match_pattern_from(&mut input_chars, pattern, i) {
-                    Some(r) => return Some(r),
+                    Some(mut r) => {
+                        results.append(&mut r);
+                    },
                     None => {}
                 }
             }
         }
     }
-    None
+    if results.len() > 0 {
+        return Some(results);
+    } else {
+        return None
+    }
 }
 
 fn print_result(input: String, match_idx: Vec<u8>) {
@@ -367,5 +377,11 @@ mod tests {
         assert_eq!(match_pattern(&"b", &expressions), Some(vec!(0)));
         assert_eq!(match_pattern(&"ab", &expressions), Some(vec!(0, 1)));
         assert_eq!(match_pattern(&"ac", &expressions), None);
+    }
+
+    #[test]
+    fn match_multiple_occurrences() {
+        let expressions = pattern_to_expressions(&"a");
+        assert_eq!(match_pattern(&"aaa", &expressions), Some((0..3).collect()));
     }
 }
